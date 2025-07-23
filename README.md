@@ -115,7 +115,7 @@ pip install -r requirements.txt
 
 3. **Message Production**
    - Chunks are serialized using Avro
-   - Messages are produced to Kafka topic 'esg_v2'
+   - Messages are produced to Kafka topic
    - Schema Registry ensures message compatibility
 
 4. **Message Consumption**
