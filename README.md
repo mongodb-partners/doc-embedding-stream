@@ -1,4 +1,4 @@
-# Document Processing Pipeline with MongoDB and Confluent
+# Document Embedding Pipeline (using Confluent Cloud)
 
 This project implements a scalable document processing pipeline using AWS S3, Apache Kafka (Confluent Cloud), MongoDB, and LlamaParse.
 
