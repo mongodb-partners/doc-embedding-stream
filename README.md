@@ -1,4 +1,4 @@
-# ESG Document Processing Pipeline
+# Document Processing Pipeline with MongoDB and Confluent
 
 This project implements a scalable document processing pipeline for ESG (Environmental, Social, and Governance) documents using AWS S3, Apache Kafka (Confluent Cloud), MongoDB, and LlamaParse.
 
