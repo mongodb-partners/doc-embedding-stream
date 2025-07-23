@@ -86,14 +86,14 @@ sasl.password=your_api_secret
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/utsavMongoDB/ESG_PoC.git
-cd ESG_PoC
+git clone https://github.com/mongodb-partners/doc-embedding-stream.git
+cd doc-embedding-stream
 ```
 
 2. Create and activate a virtual environment:
 ```bash
-python -m venv esg
-source esg/bin/activate  # On Windows: esg\Scripts\activate
+python -m venv doc-embedding-stream
+source doc-embedding-stream/bin/activate  # On Windows: doc-embedding-stream\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -172,8 +172,8 @@ The application will:
 
 2. **Create Required Topics**
    ```bash
-   # Create the source topic for raw ESG data
-   confluent kafka topic create esg_v2 --partitions 6
+   # Create the source topic for raw data
+   confluent kafka topic create raw_v1 --partitions 6
 
    # Create the destination topic for embeddings
    confluent kafka topic create summary_embedding_v2 --partitions 6
@@ -201,7 +201,7 @@ The application will:
        CAST(val as STRING),
        embeddings
    FROM
-       esg_v2,
+       raw_v1,
        LATERAL TABLE (ML_PREDICT('AWSBedrockEmbedding', CAST(val as STRING)));
    ```
 
