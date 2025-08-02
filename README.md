@@ -5,31 +5,77 @@ This project implements a scalable document processing pipeline using AWS S3, Ap
 ## Architecture
 
 ```mermaid
-flowchart LR
-    S3[("AWS S3 Bucket")] -- Raw Files --> PY("Python Script")
-    PY -- Publish --> KR{"Confluent Kafka raw Topic"}
-    KR -- Stream Processing --> FLINK("Apache Flink Job")
-    FLINK -- MLPREDICT Function --> EMB["Embedding Generation"]
-    EMB -- Transformed Data --> KE{"Confluent Kafka embedded_data Topic"}
-    KB(["Kafka Brokers"]) -. Manage Messages .-> KE
-    KE -- Consume --> CONS("Consumer Application")
-    CONS -- Store --> MDB[("MongoDB")]
+flowchart TB
+    subgraph Storage ["Data Storage"]
+        direction TB
+        S3[("AWS S3 Bucket")]
+        MDB[("MongoDB")]
+    end
 
-     S3:::storage
-     PY:::process
-     KR:::kafka
-     FLINK:::flink
-     EMB:::process
-     KE:::kafka
-     KB:::broker
-     CONS:::process
-     MDB:::storage
-    classDef storage fill:#FF9900,stroke:#232F3E,color:black,stroke-width:2px
-    classDef process fill:#3776AB,stroke:#2A5D8C,color:white,stroke-width:2px
-    classDef kafka fill:#231F20,stroke:#000000,color:white,stroke-width:2px
-    classDef flink fill:#E6526F,stroke:#C6324C,color:white,stroke-width:2px
-    classDef mongo fill:#4DB33D,stroke:#3E9431,color:white,stroke-width:2px
-    classDef broker fill:#767676,stroke:#4D4D4D,color:white,stroke-width:2px,stroke-dasharray:5 5
+    subgraph Ingestion ["Data Ingestion & Chunking"]
+        direction LR
+        PY("Python Script")
+        LP["LlamaParse"]
+        PYP("Python Processing")
+    end
+
+    subgraph Confluent ["Confluent Cloud"]
+        direction TB
+        subgraph Topics ["Kafka Topics"]
+            direction LR
+            KR["raw Topic"]
+            KE["embedded_data Topic"]
+        end
+        KB(["Kafka Brokers"])
+    end
+
+    subgraph Processing ["Data Processing"]
+        direction LR
+        FLINK("Apache Flink Job")
+        EMB["Embedding Generation"]
+    end
+
+    subgraph Consumption ["Data Consumption"]
+        direction LR
+        CONS("Consumer Application")
+        AVRO["Avro Deserializer"]
+    end
+
+    S3 -- "Raw Files" --> PY
+    PY --> LP
+    LP --> PYP
+    PYP -- "Publish" --> KR
+    KR -- "Stream" --> FLINK
+    FLINK --> EMB
+    EMB -- "Transformed Data" --> KE
+    KB -. "Manage Messages" .-> Topics
+    KE -- "Consume" --> CONS
+    CONS --> AVRO
+    AVRO -- "Structured Data" --> MDB
+
+    %% Styling
+    classDef storageStyle fill:#FF9900,stroke:#232F3E,color:black,stroke-width:2px
+    classDef processStyle fill:#3776AB,stroke:#2A5D8C,color:white,stroke-width:2px
+    classDef kafkaStyle fill:#231F20,stroke:#000000,color:white,stroke-width:2px
+    classDef flinkStyle fill:#E6526F,stroke:#C6324C,color:white,stroke-width:2px
+    classDef brokerStyle fill:#767676,stroke:#4D4D4D,color:white,stroke-width:2px
+    classDef llamaStyle fill:#7F00FF,stroke:#5D00BA,color:white,stroke-width:2px
+    classDef avroStyle fill:#C7131F,stroke:#A11119,color:white,stroke-width:2px
+    classDef subgraphStyle fill:#F5F5F5,stroke:#CCCCCC,color:#333333,stroke-width:1px
+    classDef confluentStyle fill:#F8FBFE,stroke:#2481D7,color:#333333,stroke-width:1px
+
+    class S3,MDB storageStyle
+    class PY,PYP,CONS processStyle
+    class KR,KE kafkaStyle
+    class FLINK flinkStyle
+    class KB brokerStyle
+    class LP llamaStyle
+    class EMB processStyle
+    class AVRO avroStyle
+    
+    class Storage,Ingestion,Processing,Consumption,Topics subgraphStyle
+    class Confluent confluentStyle
+    style MDB stroke:#000000,fill:#00C853
 ```
 
 This solution presents a sophisticated real-time data processing pipeline that combines cloud storage, stream processing, machine learning, and NoSQL databases to create a comprehensive system for data enrichment and analysis.
