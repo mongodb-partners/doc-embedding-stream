@@ -5,27 +5,31 @@ This project implements a scalable document processing pipeline for ESG (Environ
 ## Architecture
 
 ```mermaid
-graph LR
-    S3[(AWS S3\nPDFs)] -->|fetch PDFs| P[Producer]
-    P -->|1. Parse with LlamaParse\n2. Chunk documents| P
-    P -->|produce messages| K[Kafka Topic\nesg_v2]
-    P -.->|schema validation| SR[Schema Registry]
-    K -->|consume messages| C[Consumer]
-    C -.->|schema validation| SR
-    C -->|store documents| M[(MongoDB)]
-    
-    subgraph Data Processing Pipeline
-        P
-        K
-        C
-    end
-    
-    style S3 fill:#FF9900,stroke:#FF9900,color:white
-    style P fill:#00BFFF,stroke:#00BFFF,color:white
-    style K fill:#000000,stroke:#000000,color:white
-    style C fill:#00BFFF,stroke:#00BFFF,color:white
-    style M fill:#4DB33D,stroke:#4DB33D,color:white
-    style SR fill:#FF0000,stroke:#FF0000,color:white
+flowchart LR
+    S3[("AWS S3 Bucket")] -- Raw Files --> PY("Python Script")
+    PY -- Publish --> KR{"Confluent Kafka raw Topic"}
+    KR -- Stream Processing --> FLINK("Apache Flink Job")
+    FLINK -- MLPREDICT Function --> EMB["Embedding Generation"]
+    EMB -- Transformed Data --> KE{"Confluent Kafka embedded_data Topic"}
+    KB(["Kafka Brokers"]) -. Manage Messages .-> KE
+    KE -- Consume --> CONS("Consumer Application")
+    CONS -- Store --> MDB[("MongoDB")]
+
+     S3:::storage
+     PY:::process
+     KR:::kafka
+     FLINK:::flink
+     EMB:::process
+     KE:::kafka
+     KB:::broker
+     CONS:::process
+     MDB:::storage
+    classDef storage fill:#FF9900,stroke:#232F3E,color:black,stroke-width:2px
+    classDef process fill:#3776AB,stroke:#2A5D8C,color:white,stroke-width:2px
+    classDef kafka fill:#231F20,stroke:#000000,color:white,stroke-width:2px
+    classDef flink fill:#E6526F,stroke:#C6324C,color:white,stroke-width:2px
+    classDef mongo fill:#4DB33D,stroke:#3E9431,color:white,stroke-width:2px
+    classDef broker fill:#767676,stroke:#4D4D4D,color:white,stroke-width:2px,stroke-dasharray:5 5
 ```
 
 ## Features
