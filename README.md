@@ -32,6 +32,14 @@ flowchart LR
     classDef broker fill:#767676,stroke:#4D4D4D,color:white,stroke-width:2px,stroke-dasharray:5 5
 ```
 
+This solution presents a sophisticated real-time data processing pipeline that combines cloud storage, stream processing, machine learning, and NoSQL databases to create a comprehensive system for data enrichment and analysis.
+At its core, the architecture follows a streaming data pattern where information flows continuously from source to destination, being transformed and enriched along the way. The pipeline begins with raw data files stored in an AWS S3 bucket, which serves as the primary data lake for the solution.
+A Python script acts as the ingestion layer, reading these raw files and publishing structured data to a Confluent Kafka topic named "raw." Kafka serves as the central nervous system of this architecture, providing a resilient, high-throughput messaging backbone that decouples data producers from consumers.
+The heart of the processing layer is an Apache Flink job that consumes data from the raw Kafka topic. Flink, a powerful stream processing framework, applies transformations to the incoming data and utilizes a specialized MLPREDICT function to generate embeddings. These embeddings are vector representations that capture semantic meaning from the raw data, essentially transforming unstructured or semi-structured data into rich, machine-learning-ready formats.
+The enriched data, now containing valuable embeddings, is published to another Confluent Kafka topic called "embedded_data." Kafka brokers manage these messages, ensuring they're properly replicated, partitioned, and delivered with the appropriate guarantees.
+Finally, a consumer application reads from the embedded_data topic and stores the processed information in MongoDB, a document-oriented database well-suited for storing complex, nested data structures including vector embeddings.
+This architecture excels in scenarios requiring real-time data processing with machine learning enrichment, such as recommendation systems, semantic search applications, content classification, or anomaly detection platforms. The solution combines the best aspects of stream processing (low latency, high throughput) with the power of machine learning to create an intelligent data pipeline.RetryClaude can make mistakes. Please double-check responses.
+
 ## Features
 
 - PDF document processing from S3 bucket
