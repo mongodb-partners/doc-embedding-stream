@@ -1,6 +1,6 @@
-# ESG Document Processing Pipeline
+# Document Embedding Pipeline (using Confluent Cloud)
 
-This project implements a scalable document processing pipeline for ESG (Environmental, Social, and Governance) documents using AWS S3, Apache Kafka (Confluent Cloud), MongoDB, and LlamaParse.
+This project implements a scalable document processing pipeline using AWS S3, Apache Kafka (Confluent Cloud), MongoDB, and LlamaParse.
 
 ## Architecture
 
@@ -90,14 +90,14 @@ sasl.password=your_api_secret
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/utsavMongoDB/ESG_PoC.git
-cd ESG_PoC
+git clone https://github.com/mongodb-partners/doc-embedding-stream.git
+cd doc-embedding-stream
 ```
 
 2. Create and activate a virtual environment:
 ```bash
-python -m venv esg
-source esg/bin/activate  # On Windows: esg\Scripts\activate
+python -m venv doc-embedding-stream
+source doc-embedding-stream/bin/activate  # On Windows: doc-embedding-stream\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -119,7 +119,7 @@ pip install -r requirements.txt
 
 3. **Message Production**
    - Chunks are serialized using Avro
-   - Messages are produced to Kafka topic 'esg_v2'
+   - Messages are produced to Kafka topic
    - Schema Registry ensures message compatibility
 
 4. **Message Consumption**
@@ -176,8 +176,8 @@ The application will:
 
 2. **Create Required Topics**
    ```bash
-   # Create the source topic for raw ESG data
-   confluent kafka topic create esg_v2 --partitions 6
+   # Create the source topic for raw data
+   confluent kafka topic create raw_v1 --partitions 6
 
    # Create the destination topic for embeddings
    confluent kafka topic create summary_embedding_v2 --partitions 6
@@ -205,7 +205,7 @@ The application will:
        CAST(val as STRING),
        embeddings
    FROM
-       esg_v2,
+       raw_v1,
        LATERAL TABLE (ML_PREDICT('AWSBedrockEmbedding', CAST(val as STRING)));
    ```
 
